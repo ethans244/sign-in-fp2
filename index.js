@@ -131,7 +131,7 @@ function view() {
   return html`
       <p>Successful Sign in!</p>
       <button @click=${signOutUser}>Sign Out</button> 
-      <a href = ./App.html> Tetris </a>`;
+      <a href = ./https://ethans244.github.io/tetris-fp1/> Tetris </a>`;
 }
 
 
