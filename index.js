@@ -130,8 +130,7 @@ onAuthStateChanged(auth, (user) => {
       userBlocks = fields.data().blocksStacked
       console.log(userBlocks);
       
-      console.log(q)
-    
+        
       render(view(userBlocks), document.body);
     }).catch(error => {
       // if user hasn't signed in before
@@ -139,7 +138,6 @@ onAuthStateChanged(auth, (user) => {
       setDoc(docRef, data)
       render(view(0), document.body);
     });
-    console.log(userBlocks);
 
     
 
