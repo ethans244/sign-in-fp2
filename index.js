@@ -150,14 +150,14 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-
+(async () => {
 const q = query(collection(db, "users"), orderBy("blocksStacked"), limit(3))
 const querySnapshot = await getDocs(q)
 console.log(querySnapshot)
 querySnapshot.forEach((doc) => {
   // doc.data() is never undefined for query doc snapshots
   console.log(doc.id, " => ", doc.data());
-});
+});})
 
 // This function returns a template with the sign in view - what the user sees when they're signed out
 function view(userBlocks) {
