@@ -16,13 +16,18 @@ import {
   doc,
   addDoc,
   setDoc,
+  getDoc,
   getDocs,
+  limit,
   onSnapshot,
   query,
   orderBy,
+  updateDoc,
+  QuerySnapshot,
 } from "firebase/firestore";
 
 import { html, render } from "lit-html";
+
 
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -49,14 +54,16 @@ const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 console.log(db.toJSON)
 const ref = db.ref;
-console.log(ref)
 const auth = getAuth(firebaseApp);
 const provider = new GoogleAuthProvider();
 
 
 // firebaseApp.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 const dbRef = collection(db, "users");
+var docRef = null
 var data = {}
+var userBlocks = 0;
+
 
 function signInUser() {
   signInWithRedirect(auth, provider);
@@ -101,21 +108,42 @@ onAuthStateChanged(auth, (user) => {
     data = {
       'UID': uid,
       'name': user.displayName,
-      'blocksStacked': 0 
     }
-    const docRef = doc(collection(db, "users"))
+    docRef = doc(collection(db, "users"), uid)
+
+    console.log(docRef)
+    
+
+
+//    collection(db, "users").orderBy('blocksStacked').limit(3)
+
+
+
+
+
+    /*querySnapshot.forEach((doc) => {
+      // doc.data() is never undefined for query doc snapshots
+      console.log(doc.id, " => ", doc.data());
+    });*/
+
+    getDoc(doc(db, 'users', uid)).then((fields) => {
+      userBlocks = fields.data().blocksStacked
+      console.log(userBlocks);
+      
+      console.log(q)
+    
+      render(view(userBlocks), document.body);
+    }).catch(error => {
+      // if user hasn't signed in before
+      console.log(error);
+      setDoc(docRef, data)
+      render(view(0), document.body);
+    });
+    console.log(userBlocks);
 
     
-    
-   setDoc(docRef, data)
-      .then(doc => {
-      console.log("Document has been added successfully");
-    })
-      .catch(error => {
-      console.log(error);
-    })
+
     // If there is an authenticated user, we render the normal view
-    render(view(), document.body);
   } else {
     // Otherwise, we render the sign in view
     render(signInView(), document.body);
@@ -123,15 +151,21 @@ onAuthStateChanged(auth, (user) => {
 });
 
 
-
-
+const q = query(collection(db, "users"), orderBy("blocksStacked"), limit(3))
+const querySnapshot = await getDocs(q)
+console.log(querySnapshot)
+querySnapshot.forEach((doc) => {
+  // doc.data() is never undefined for query doc snapshots
+  console.log(doc.id, " => ", doc.data());
+});
 
 // This function returns a template with the sign in view - what the user sees when they're signed out
-function view() {
+function view(userBlocks) {
   return html`
-      <p>Successful Sign in!</p>
+      <p>Successful sign in ${auth.currentUser.displayName}!</p>
+      <p>You have stacked a total of ${userBlocks} blocks!</p>
       <button @click=${signOutUser}>Sign Out</button> 
-      <a href = app.html> Tetris </a>`;
+      <a href = App.html> Tetris </a>`;
 }
 
 

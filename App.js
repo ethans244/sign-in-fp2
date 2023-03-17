@@ -13,16 +13,40 @@ import {
 import {
     getFirestore,
     collection,
+    doc,
+    setDoc,
+    updateDoc,
     addDoc,
     getDocs,
     onSnapshot,
     query,
     orderBy,
+    increment,
 } from "firebase/firestore";
 import { html, render } from "lit-html";
 import { sketch } from 'p5js-wrapper';
 
-console.log(localStorage.getItem('uid'))
+const firebaseConfig = {
+    apiKey: "AIzaSyCw11jrqwWZZl24yqDBdLoS9H3OkNX8VCE",
+    authDomain: "my-app-beb62.firebaseapp.com",
+    projectId: "my-app-beb62",
+    storageBucket: "my-app-beb62.appspot.com",
+    messagingSenderId: "38292691836",
+    appId: "1:38292691836:web:50df4ebe3462958c8822f9",
+    measurementId: "G-MQXEPTYRKZ"
+  };
+  
+  
+  
+  const firebaseApp = initializeApp(firebaseConfig);
+  const db = getFirestore(firebaseApp);
+  console.log(db.toJSON)
+  const ref = db.ref;
+  console.log(ref)
+
+
+  
+  
 
 var allBlocks = [];
 var width = 0;
@@ -34,6 +58,9 @@ var newBlockChecker = false;
 var newGameCheck = false
 let button;
 var boolean = false;
+var uid = 0;
+var user = 0;
+var auth = null;
 
 var gameBoard = [];
 var currBlock;
@@ -253,6 +280,26 @@ function startNewGame() {
         }
     }
 
+
+    var data = {
+        'UID': uid,
+        'name': user.displayName,
+        'blocksStacked': numBlocksStacked + 1
+      }
+     const docRef = doc(collection(db, "users"), uid)
+     updateDoc(docRef, {
+        blocksStacked: increment(numBlocksStacked)
+     })
+     
+     /*setDoc(docRef, data)
+        .then(doc => {
+        console.log("Document has been added successfully");
+      })
+        .catch(error => {
+        console.log(error);
+      })*/
+
+    
     makeNewBlock();
     numBlocksStacked = 0
 
@@ -298,9 +345,19 @@ sketch.setup = function () {
 
 
 sketch.draw = function () {
+
+    auth = getAuth(firebaseApp);
+    user = auth.currentUser
+
+    if (user != null) {
+        uid = user.uid
+    }
+
+    
     frameRate(.5)
     drawGameBoard();
     drawAllBlocks();
+    
     //creates the block the player is currently controlling and continuosly shifts it down
     let blocks = currBlock.blocks
     fill(currColor);
@@ -314,6 +371,7 @@ sketch.draw = function () {
         }
     }
     gameBoardUpdater();
+    console.log(numBlocksStacked)
 }
 
 
