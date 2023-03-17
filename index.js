@@ -108,6 +108,7 @@ onAuthStateChanged(auth, (user) => {
     data = {
       'UID': uid,
       'name': user.displayName,
+      'blocksStacked': 0
     }
     docRef = doc(collection(db, "users"), uid)
 
@@ -133,7 +134,7 @@ onAuthStateChanged(auth, (user) => {
         
       render(view(userBlocks), document.body);
     }).catch(error => {
-      // if user hasn't signed in before
+      // if user hasn't signed in before, create new doc for them
       console.log(error);
       setDoc(docRef, data)
       render(view(0), document.body);
@@ -148,14 +149,15 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-(async () => {
+
 const q = query(collection(db, "users"), orderBy("blocksStacked"), limit(3))
-const querySnapshot = await getDocs(q)
-console.log(querySnapshot)
-querySnapshot.forEach((doc) => {
-  // doc.data() is never undefined for query doc snapshots
+const querySnapshot = await getDocs(q).then((doc) => {
   console.log(doc.id, " => ", doc.data());
-});})
+
+})
+
+
+
 
 // This function returns a template with the sign in view - what the user sees when they're signed out
 function view(userBlocks) {
