@@ -92,7 +92,7 @@ function makeNewBlock() {
     let randomBlockChooser = getRandomInt(6)
     
 
-    currBlock = JSON.parse(JSON.stringify(possibleBlocks[randomBlockChooser]))
+    currBlock = JSON.parse(JSON.stringify(possibleBlocks[1]))
     currBlock.color = currColor
 
     for (let j = 0; j < currBlock.blocks.length; j++) {
@@ -125,11 +125,11 @@ function gameBoardUpdater() {
             newBlockChecker = true;
         } else if (gameBoard[y][x]) {
             newBlockChecker = true;
-            numBlocksStacked++
         }
     }
     if (newBlockChecker) {
         newBlockChecker = false;
+        numBlocksStacked++
         for (let j = 0; j < currBlock.blocks.length; j++) {
             let y2 = Math.round(currBlock.blocks[j].yPos / diameter) - 1
             let x2 = Math.round(currBlock.blocks[j].xPos / diameter - gridStart / diameter) 
@@ -213,6 +213,41 @@ function getMinMaxWithMath(arr){
    let result =  ([maximum, minimum]); 
     return result;
   };
+
+function rotateBlock() {
+    switch(currBlock.blockKey) {
+        case 0:
+
+            switch(currBlock.rotation) {
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break
+
+            }
+
+            break;
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
+            break;
+        case 6:
+            break;
+    }
+
+        
+};
+
 
 // shifts the current block along the x-axis depending on user input
 function shiftCurrBlock(shiftX) {
@@ -342,7 +377,7 @@ sketch.keyPressed = (event) => {
         shiftCurrBlock(1)
     } else if (keyCode == 37) {
         shiftCurrBlock(-1)
-    }
+    } 
 };
 
 function stop() {
@@ -374,7 +409,8 @@ sketch.setup = function () {
     let newBlock = {
         blocks: [],
         color: 0,
-        blockKey: 0
+        blockKey: 0,
+        rotation: 0
     }
     let singleBlock = {
         xPos: diameter * 2, 
@@ -395,7 +431,8 @@ sketch.setup = function () {
     newBlock = {
         blocks: [],
         color: 0,
-        blockKey: 1
+        blockKey: 1,
+        rotation: 0
     }
     singleBlock = {
         xPos: 0, 
@@ -415,7 +452,8 @@ sketch.setup = function () {
     newBlock = {
         blocks: [],
         color: 0,
-        blockKey: 2
+        blockKey: 2,
+        rotation: 0
     }
     newBlock.blocks.push(singleBlock)
     for (let i = 0; i < 2; i++) {
@@ -438,7 +476,8 @@ sketch.setup = function () {
     newBlock = {
         blocks: [],
         color: 0,
-        blockKey: 3
+        blockKey: 3,
+        rotation: 0
     }
     newBlock.blocks.push(singleBlock)
     for (let i = 0; i < 2; i++) {
@@ -461,7 +500,8 @@ sketch.setup = function () {
     newBlock = {
         blocks: [],
         color: 0,
-        blockKey: 4
+        blockKey: 4,
+        rotation: 0
     }
     for (let i = 0; i < 4; i++) {
         singleBlock = {
@@ -476,7 +516,8 @@ sketch.setup = function () {
     newBlock = {
         blocks: [],
         color: 0,
-        blockKey: 5
+        blockKey: 5,
+        rotation: 0
     }
     singleBlock = {
         xPos: diameter,
@@ -496,7 +537,8 @@ sketch.setup = function () {
     newBlock = {
         blocks: [],
         color: 0,
-        blockKey: 6
+        blockKey: 6,
+        rotation: 0
     }
     for (let i = 0; i < 2; i++) {
         singleBlock = {
