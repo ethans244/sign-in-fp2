@@ -91,8 +91,7 @@ function makeNewBlock() {
     let startingXPos = diameter * Math.round(getRandomInt(gridWidth - 4)) + gridStart;
     let randomBlockChooser = getRandomInt(6)
     
-
-    currBlock = JSON.parse(JSON.stringify(possibleBlocks[1]))
+    currBlock = JSON.parse(JSON.stringify(possibleBlocks[randomBlockChooser]))
     currBlock.color = currColor
 
     for (let j = 0; j < currBlock.blocks.length; j++) {
