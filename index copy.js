@@ -27,8 +27,6 @@ import {
 } from "firebase/firestore";
 
 import { html, render } from "lit-html";
-import {styleMap} from 'lit-html/directives/style-map.js';
-
 
 
 
@@ -96,19 +94,10 @@ function signOutUser() {
 
 // This function returns a template with the sign in view - what the user sees when they're signed out
 function signInView() {
-
-  let style1 = {
-    marginLeft: '30%',
-    marginRight: '30%'
-  };
-
-  return html`
-  <div style=${styleMap(style1)}>
-  <button class="sign-in" @click=${signInUser}>
+  return html`<button class="sign-in" @click=${signInUser}>
       Sign in with Google
     </button>
-  </div>`
-    
+    <button class="sign-in" @click=${signInAnon}>Anonymous Sign in</button>`;
 }
 
 
@@ -152,7 +141,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 
-const q = query(collection(db, "users"), orderBy("blocksStacked", "desc"), limit(3))
+const q = query(collection(db, "users"), orderBy("blocksStacked"), limit(3))
 const querySnapshot = await getDocs(q)
 querySnapshot.forEach((doc) => {
   // doc.data() is never undefined for query doc snapshots
@@ -164,45 +153,32 @@ querySnapshot.forEach((doc) => {
 console.log(user)
 
 
-
 // This function returns a template with the sign in view - what the user sees when they're signed out
 function view(userBlocks) {
-  let styles = {
-    color: 'black',
-    marginLeft: '30%',
-    marginRight: '30%'
-  };
-  let tableStyles = {
-    border: '1px solid black', color: 'white'
-  }
-
   return html`
-  <div style=${styleMap(styles)}>
       <p>Successful sign in ${auth.currentUser.displayName}!</p>
       <p>You have stacked a total of ${userBlocks} blocks!</p>
       <button @click=${signOutUser}>Sign Out</button> 
-      <button onclick = "window.location.href='App.html';"> Play Tetris </button>
-      
-      <h2>Top users</h2>
-      <table style="background-color: gray; ${styleMap(tableStyles)}">
+      <a href = App.html> Tetris </a>
+      <h1>Top users</h1>
+      <table>
         <tr>
-          <th style=${styleMap(tableStyles)}>Username</th>
-          <th style=${styleMap(tableStyles)}>Score</th> 
-        </tr>
-        <tr style=${styleMap(tableStyles)}>
-          <td style=${styleMap(tableStyles)}>${topUsers[0].name}</td>
-          <td style=${styleMap(tableStyles)}>${topUsers[0].score}</td> 
+          <th>User</th>
+          <th>Score</th> 
         </tr>
         <tr>
-          <td style=${styleMap(tableStyles)}>${topUsers[1].name}</td>
-          <td style=${styleMap(tableStyles)}>${topUsers[1].score}</td> 
+          <td>${topUsers[2].name}</td>
+          <td>${topUsers[2].score}</td> 
         </tr>
         <tr>
-          <td style=${styleMap(tableStyles)}>${topUsers[2].name}</td>
-          <td style=${styleMap(tableStyles)}>${topUsers[2].score}</td> 
+          <td>${topUsers[1].name}</td>
+          <td>${topUsers[1].score}</td> 
+        </tr>
+        <tr>
+          <td>${topUsers[0].name}</td>
+          <td>${topUsers[0].score}</td> 
         </tr>
       </table>
-    </div>
       
       
       

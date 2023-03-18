@@ -10,6 +10,11 @@ body {
   display: flex;
 }
 
+.homepage {
+  margin-left: 30%;
+  margin-right: 30%;
+}
+
 .column1 {
   flex: 80%;
 }

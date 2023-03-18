@@ -52,24 +52,19 @@ var allBlocks = [];
 var width = 0;
 var height = 0;
 var currColor = 0;
-const gridWidth = 8;
-const gridHeight = 8;
-var gridStart = 0;
+const gridSize = 8;
 var diameter;
 var newBlockChecker = false;
 var newGameCheck = false
 let button;
-let gameOverButton = null;
-var gameOverText = null;
-var blocksStackedText = null;
 var boolean = false;
 var uid = 0;
 var user = 0;
 var auth = null;
+
 var gameBoard = [];
 var currBlock;
 var firstGame = true;
-var possibleBlocks = []
 
 var numBlocksStacked = 0;
 
@@ -82,23 +77,38 @@ function getRandomInt(max) {
 //Makes a new block for the user and stores the previous block into memory 
 function makeNewBlock() {
     // generates a random color
-    currBlock = {}
 
     currColor = generateRandomColor();
     fill(currColor)
 
     //generates a random starting position for the block
-    let startingXPos = diameter * Math.round(getRandomInt(gridWidth - 4)) + gridStart;
-    let randomBlockChooser = getRandomInt(6)
-    
+    let startingXPos = diameter * Math.round(getRandomInt(gridSize - 4));
+    let yPos = 0;
 
-    currBlock = JSON.parse(JSON.stringify(possibleBlocks[randomBlockChooser]))
-    currBlock.color = currColor
+    currBlock = {}
+    var coordArr = [];
 
-    for (let j = 0; j < currBlock.blocks.length; j++) {
-        currBlock.blocks[j].xPos += startingXPos
-        rect(currBlock.blocks[j].xPos, currBlock.blocks[j].yPos, diameter, diameter)
+    width = Math.round(getRandomInt(2)) + 1;
+    height = Math.round(getRandomInt(3)) + 1;
+
+    //generates a block by randomly choosing the amount of rectangles it will have
+    for (let j = 0; j < 2; j++) {
+        let xPos = startingXPos;
+        for (let i = 0; i < 1; i++) {
+
+            var singeBlock = {};
+            singeBlock["xPos"] = xPos;
+            singeBlock["yPos"] = yPos;
+
+            rect(xPos, yPos, diameter, diameter)
+            xPos += diameter;
+
+            coordArr.push(singeBlock);
+        }
+        yPos += diameter;
     }
+    currBlock['blocks'] = coordArr;
+    currBlock['color'] = currColor;
 
     //}
 }
@@ -109,7 +119,7 @@ function gameBoardUpdater() {
     for (var j = 0; j < b.length; j++) {
         let blockYPos = b[j].yPos / diameter - 1
         let blockXPos = b[j].xPos / diameter
-        for (var i = 0; i < gridWidth; i++) {
+        for (var i = 0; i < gridSize; i++) {
             console.log("[y: " + ", x: " + blockXPos + ", i " + i)
             if (blockYPos == 0 && gameBoard[1][i] && gameBoard[blockXPos] == i) {
                 startNewGame();
@@ -118,21 +128,22 @@ function gameBoardUpdater() {
         }
     }*/
     for (let z = 0; z < b.length; z++) {
-        let y = Math.ceil(b[z].yPos / diameter)
-        let x = Math.ceil((b[z].xPos / diameter) - gridStart / diameter)
-
-        if (y == gridHeight) {
+        let y = Math.round(b[z].yPos / diameter)
+        let x = Math.round(b[z].xPos / diameter)
+        if (y == gridSize) {
             newBlockChecker = true;
         } else if (gameBoard[y][x]) {
             newBlockChecker = true;
             numBlocksStacked++
         }
     }
+
     if (newBlockChecker) {
         newBlockChecker = false;
         for (let j = 0; j < currBlock.blocks.length; j++) {
             let y2 = Math.round(currBlock.blocks[j].yPos / diameter) - 1
-            let x2 = Math.round(currBlock.blocks[j].xPos / diameter - gridStart / diameter) 
+            let x2 = Math.round(currBlock.blocks[j].xPos / diameter)
+
             gameBoard[y2][x2] = true;
             if (y2 == 0) {
                 startNewGame();
@@ -140,7 +151,6 @@ function gameBoardUpdater() {
             }
         }
         allBlocks.push(currBlock)
-        console.log(allBlocks)
         makeNewBlock();
         return;
     }
@@ -156,10 +166,10 @@ function drawGameBoard() {
     fill('gray')
     let y = 0;
 
-    for (var i = 0; i < gridHeight; i++) {
-        let x = gridStart;
+    for (var i = 0; i < gridSize; i++) {
+        let x = 0;
 
-        for (var j = 0; j < gridWidth; j++) {
+        for (var j = 0; j < gridSize; j++) {
             square(x, y, diameter);
             x += diameter;
         }
@@ -183,11 +193,11 @@ function drawAllBlocks() {
 
 //function to generate the 2d array representation of the gameboard
 function generateGameboard() {
-    gameBoard = new Array(gridHeight - 1);
-    for (var i = 0; i < gridHeight; i++) {
-        gameBoard[i] = new Array(gridWidth - 1);
+    gameBoard = new Array(gridSize - 1);
+    for (var i = 0; i < gridSize; i++) {
+        gameBoard[i] = new Array(gridSize - 1);
 
-        for (var j = 0; j < gridWidth; j++) {
+        for (var j = 0; j < gridSize; j++) {
             gameBoard[i][j] = false
         }
 
@@ -205,36 +215,20 @@ function gameBoardToString(gameBoard) {
     }
 }
 
-function getMinMaxWithMath(arr){
-    // Math.max(10,3,8,1,33)
-    let maximum = Math.max(...arr);
-    // Math.min(10,3,8,1,33)
-    let minimum = Math.min(...arr);
-   let result =  ([maximum, minimum]); 
-    return result;
-  };
-
 // shifts the current block along the x-axis depending on user input
 function shiftCurrBlock(shiftX) {
 
     // Figures out what the starting and ending x coordinaes of our block, 
     // used to check if shifting the block would move it out of the grids bounds
-    let xArr = []
-    let yArr = []
-    for(let i = 0; i < currBlock.blocks.length; i++) {
-        xArr.push(currBlock.blocks[i].xPos)
-        yArr.push(currBlock.blocks[i].yPos)
-    }
-    let xResult = getMinMaxWithMath(xArr)
-    let yResult = getMinMaxWithMath(yArr)
+    let blockStartX = currBlock.blocks[0].xPos / diameter
+    let blockEndX = currBlock.blocks[currBlock.blocks.length - 1].xPos / diameter
+    let bottomY = currBlock.blocks[currBlock.blocks.length - 1].yPos / diameter - 1
+    console.log("start x: " + blockStartX + ", end x: " + blockEndX + ", bottom y: " + bottomY)
 
-    let blockStartX = Math.ceil(xResult[1] / diameter - (gridStart / diameter))
-    let blockEndX = Math.ceil((xResult[0] / diameter) - (gridStart / diameter))
-    let bottomY = Math.ceil(yResult[0] / diameter - 1)
 
     if (((blockStartX != 0 && shiftX == -1) ||
-        (blockEndX != gridWidth - 1 && shiftX == 1)) &&
-        (bottomY != gridHeight && bottomY != gridHeight - 1) &&
+        (blockEndX != gridSize - 1 && shiftX == 1)) &&
+        (bottomY != gridSize && bottomY != gridSize - 1) &&
         ((!gameBoard[bottomY + 1][blockEndX + 1] && shiftX == 1) ||
             (!gameBoard[bottomY + 1][blockStartX - 1] && shiftX == -1))) {
 
@@ -271,32 +265,17 @@ function generateRandomColor() {
     return color(h, s, v)
 }
 
-function continueGame() {
-    gameOverButton.hide()
-    gameOverText.clear()
-    makeNewBlock();
-    numBlocksStacked = 0
-    loop()
-}
-
-
-
 
 function startNewGame() {
-
-
-
-
     newGameCheck = false
-    //drawGameBoard();
+    drawGameBoard();
     currBlock = {};
     allBlocks = [];
     firstGame = false;
 
-    
-    for (let i = 0; i < gridHeight; i++) {
+    for (let i = 0; i < gridSize; i++) {
 
-        for (let z = 0; z < gridWidth; z++) {
+        for (let z = 0; z < gridSize; z++) {
             gameBoard[i][z] = false
         }
     }
@@ -312,21 +291,20 @@ function startNewGame() {
         blocksStacked: increment(numBlocksStacked)
      })
      
-    fill('black')
-    gameOverText = text("GAME OVER", 100, windowHeight/4, 200, 200)
-    blocksStackedText = text("You have stacked " + numBlocksStacked + " blocks this round!", 100, windowHeight/4 + 50, 150, 100)
-    gameOverButton = createButton('Start new game');
-    gameOverButton.position(100, windowHeight/4 + 200);
-    gameOverButton.mousePressed(continueGame);
-    noLoop()
+     /*setDoc(docRef, data)
+        .then(doc => {
+        console.log("Document has been added successfully");
+      })
+        .catch(error => {
+        console.log(error);
+      })*/
 
     
-
+    makeNewBlock();
+    numBlocksStacked = 0
 
 
 }
-
-
 
 
 /*keyPressed = (event) => {
@@ -346,199 +324,40 @@ sketch.keyPressed = (event) => {
 };
 
 function stop() {
-    //startNewGame();
     sketch.noLoop();
 }
 
 sketch.setup = function () {
     createCanvas(windowWidth, windowHeight)
-    gridStart = windowWidth / 3;
+
     gameBoard = generateGameboard();
     currColor = generateRandomColor()
-    diameter = windowHeight / gridHeight;
-    auth = getAuth(firebaseApp);
-
-    console.log(gridStart)
-    sketch.textSize(20);
-
-    sketch.button = createButton('debugging tool');
-    sketch.button.position(0, 0);
-    sketch.button.mousePressed(stop);
-
-
-    //Creates all possible blocks that could be spawned, these are based off of
-    //the shape of the blocks in the tetris game
-
-    //block 1
-
-    let newBlock = {
-        blocks: [],
-        color: 0,
-        blockKey: 0
-    }
-    let singleBlock = {
-        xPos: diameter * 2, 
-        yPos: 0
-    }
-    newBlock.blocks.push(singleBlock)
-    for (let i = 0; i < 3; i++) {
-        singleBlock = {
-            xPos: diameter * i, 
-            yPos: diameter
-        }
-        newBlock.blocks.push(singleBlock)
-    }
-    possibleBlocks.push(newBlock)
-
-
-    //block 2
-    newBlock = {
-        blocks: [],
-        color: 0,
-        blockKey: 1
-    }
-    singleBlock = {
-        xPos: 0, 
-        yPos: 0
-    }
-    newBlock.blocks.push(singleBlock)
-    for (let i = 0; i < 3; i++) {
-        singleBlock = {
-            xPos: diameter * i, 
-            yPos: diameter
-        }
-        newBlock.blocks.push(singleBlock)
-    }
-    possibleBlocks.push(newBlock)
-
-    //block 3
-    newBlock = {
-        blocks: [],
-        color: 0,
-        blockKey: 2
-    }
-    newBlock.blocks.push(singleBlock)
-    for (let i = 0; i < 2; i++) {
-        singleBlock = {
-            xPos: diameter * i, 
-            yPos: 0
-        }
-        newBlock.blocks.push(singleBlock)
-    }
-    for (let i = 1; i < 3; i++) {
-        singleBlock = {
-            xPos: diameter * i, 
-            yPos: diameter
-        }
-        newBlock.blocks.push(singleBlock)
-    }
-    possibleBlocks.push(newBlock)
-
-    //block 4
-    newBlock = {
-        blocks: [],
-        color: 0,
-        blockKey: 3
-    }
-    newBlock.blocks.push(singleBlock)
-    for (let i = 0; i < 2; i++) {
-        singleBlock = {
-            xPos: diameter * i, 
-            yPos: diameter
-        }
-        newBlock.blocks.push(singleBlock)
-    }
-    for (let i = 1; i < 3; i++) {
-        singleBlock = {
-            xPos: diameter * i, 
-            yPos: 0
-        }
-        newBlock.blocks.push(singleBlock)
-    }
-    possibleBlocks.push(newBlock)
-
-    //block 5
-    newBlock = {
-        blocks: [],
-        color: 0,
-        blockKey: 4
-    }
-    for (let i = 0; i < 4; i++) {
-        singleBlock = {
-            xPos: diameter * i, 
-            yPos: 0
-        }
-        newBlock.blocks.push(singleBlock)
-    }
-    possibleBlocks.push(newBlock)
-
-    //block 6
-    newBlock = {
-        blocks: [],
-        color: 0,
-        blockKey: 5
-    }
-    singleBlock = {
-        xPos: diameter,
-        yPos: 0
-    }
-    newBlock.blocks.push(singleBlock)
-    for (let i = 0; i < 4; i++) {
-        singleBlock = {
-            xPos: diameter * i, 
-            yPos: diameter
-        }
-        newBlock.blocks.push(singleBlock)
-    }
-    possibleBlocks.push(newBlock)
-
-    //block 7
-    newBlock = {
-        blocks: [],
-        color: 0,
-        blockKey: 6
-    }
-    for (let i = 0; i < 2; i++) {
-        singleBlock = {
-            xPos: diameter * i, 
-            yPos: 0
-        }
-        newBlock.blocks.push(singleBlock)
-    }
-    for (let i = 0; i < 2; i++) {
-        singleBlock = {
-            xPos: diameter * i, 
-            yPos: diameter
-        }
-        newBlock.blocks.push(singleBlock)
-    }
-    possibleBlocks.push(newBlock)
-            
-    console.log(possibleBlocks)
-    console.log(diameter)
-
+    diameter = Math.min(windowWidth, windowHeight) / gridSize;
 
     drawGameBoard();
     makeNewBlock();
-    
+
+    sketch.button = createButton('debugger me');
+    sketch.button.position(0, 0);
+    sketch.button.mousePressed(stop);
+
 }
 
 
 sketch.draw = function () {
 
-
+    auth = getAuth(firebaseApp);
     user = auth.currentUser
+
     if (user != null) {
         uid = user.uid
     }
 
     
-    frameRate(1)
+    frameRate(.5)
     drawGameBoard();
     drawAllBlocks();
-
-
-    console.log(possibleBlocks)
+    
     //creates the block the player is currently controlling and continuosly shifts it down
     let blocks = currBlock.blocks
     fill(currColor);
@@ -552,6 +371,7 @@ sketch.draw = function () {
         }
     }
     gameBoardUpdater();
+    console.log(numBlocksStacked)
 }
 
 
