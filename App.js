@@ -53,7 +53,7 @@ var width = 0;
 var height = 0;
 var currColor = 0;
 const gridWidth = 8;
-const gridHeight = 8;
+const gridHeight = 16;
 var gridStart = 0;
 var diameter;
 var newBlockChecker = false;
